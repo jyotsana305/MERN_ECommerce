@@ -1,0 +1,131 @@
+/* ── Layout ── */
+.products-layout {
+    display: flex;
+    gap: 20px;
+    padding: 30px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
+/* ── Left filter sidebar ── */
+.filter-section {
+    width: 200px;
+    min-width: 200px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 20px 16px;
+}
+
+.filter-heading {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #333;
+    margin: 0 0 14px 0;
+    text-transform: uppercase;
+}
+
+/* ── Right products area ── */
+.products-section {
+    flex: 1;
+}
+
+.products-product-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+/* ── Individual product card ── */
+.product-card {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: box-shadow 0.2s;
+}
+
+.product-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Product image: constrained, not full-bleed ── */
+.product-card img,
+.product-image {
+    width: 100%;
+    height: 180px;           /* fixed height so cards stay uniform */
+    object-fit: contain;     /* show full image without cropping */
+    margin-bottom: 10px;
+}
+
+/* ── Text ── */
+.product-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    margin: 4px 0 2px;
+}
+
+.product-price {
+    font-size: 13px;
+    color: #555;
+    margin: 2px 0 6px;
+}
+
+/* ── Stars ── */
+.product-stars {
+    color: #f5a623;
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.product-reviews {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+/* ── View Details button ── */
+.product-btn {
+    background: #4a3f6b;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 7px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.product-btn:hover {
+    background: #372e52;
+}
+
+/* ── Responsive: 2 columns on tablet ── */
+@media (max-width: 900px) {
+    .products-product-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ── Responsive: stack on mobile ── */
+@media (max-width: 560px) {
+    .products-layout {
+        flex-direction: column;
+    }
+    .filter-section {
+        width: 100%;
+        min-width: unset;
+    }
+    .products-product-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
