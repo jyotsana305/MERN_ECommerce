@@ -1,8 +1,11 @@
 // Seeds a handful of sample products using the images already bundled in
 // frontend/public/images, so the storefront isn't empty out of the box.
-// Run from the project root: node backend/seedProducts.js
+// Run via `npm run seed` from either the project root or the backend/ folder.
 import dotenv from 'dotenv';
-dotenv.config({ path: './backend/.env' });
+import { fileURLToPath } from 'url';
+import path from 'path';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 import mongoose from 'mongoose';
 import Product from './model/productModel.js';
 import User from './model/userModel.js';

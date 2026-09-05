@@ -2,8 +2,15 @@ import app from "./app.js";
 import dotenv from "dotenv";
 import {v2 as cloudinary} from 'cloudinary';
 import connectMongoDatabase from "./config/db.js";
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-dotenv.config({ path: "./backend/.env" });
+// Resolve .env relative to this file's own location (backend/) rather than
+// the process's working directory, so this works whether the app is started
+// from the project root or from inside backend/ (e.g. via backend's own
+// package.json scripts).
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 connectMongoDatabase();
 cloudinary.config({
