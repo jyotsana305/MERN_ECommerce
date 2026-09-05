@@ -20,6 +20,13 @@ process.on('uncaughtException', (err) => {
 
 const port = process.env.PORT || 3000;
 
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'Server is healthy'
+    });
+});
+
 const server = app.listen(port, () => {
     console.log(`Server is running on PORT ${port}`);
 });
