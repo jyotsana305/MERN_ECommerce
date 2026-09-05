@@ -32,7 +32,7 @@ useEffect(()=>{
         <div className="home-container">
             <h2 className="home-heading">Glam Grab</h2>     
             <div className="home-product-container">
-                {error && <p style={{color:'red'}}>{error}</p>}
+                {error && <p style={{color:'red'}}>{error.message}</p>}
                 {products.map((product,index)=>(
                     <Product product={product} key={index}/>
                 ))}
