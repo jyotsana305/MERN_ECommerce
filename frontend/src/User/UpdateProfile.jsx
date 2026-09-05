@@ -2,16 +2,17 @@ import React, { useEffect, useState } from "react";
 import '../UserStyles/Form.css'
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import Loader from "../components/Loader";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { updatePassword } from "../../../backend/controller/userController";
-import { removeSuccess, updateProfile } from "./userSlice";
+import { toast } from "react-toastify";
+import { removeErrors, removeSuccess, updateProfile } from "./userSlice";
 
 function UpdateProfile(){
     const [name,setName]=useState("");
     const [email,setEmail]=useState("");
       const [avatar,setAvatar]=useState("");
-      const [avatarPreview,setAvatarPreview]=useState("./images/profile.png");
+      const [avatarPreview,setAvatarPreview]=useState("/images/profile.png");
       const {user,error,success,message,loading}=useSelector(state=>state.user)
       const dispatch=useDispatch();
       const navigate=useNavigate();
@@ -23,7 +24,7 @@ function UpdateProfile(){
                     setAvatar(reader.result)
                 }
             }
-            reader.onerror=error=>{
+            reader.onerror=()=>{
                 toast.error('Error reading file')
             }
             reader.readAsDataURL(e.target.files[0]);
@@ -39,13 +40,13 @@ function UpdateProfile(){
       }
       useEffect(()=>{
           if(error){
-              toast.error(error.message,{position:'top-center',autoClose:3000});
+              toast.error(error,{position:'top-center',autoClose:3000});
               dispatch(removeErrors())
           }
       },[dispatch,error])
            useEffect(()=>{
           if(success){
-              toast.error(error.message,{position:'top-center',autoClose:3000});
+              toast.success(message,{position:'top-center',autoClose:3000});
               dispatch(removeSuccess())
               navigate("/profile")
           }
@@ -54,11 +55,11 @@ function UpdateProfile(){
         if(user){
             setName(user.name)
             setEmail(user.email)
-            setAvatarPreview(user.avatar.url || './images/profile.png')
+            setAvatarPreview(user.avatar?.url || '/images/profile.png')
         }
       },[user])
     return(
-       {loading ?:(<Loader/>)( <>
+       loading ? (<Loader/>) : ( <>
         <Navbar/>
         <div className="container update-container">
             <div className="form-content">
@@ -82,6 +83,8 @@ function UpdateProfile(){
                 </form>
             </div>
         </div>
-        </>)}
+        <Footer/>
+        </>)
     )
 }
+export default UpdateProfile;

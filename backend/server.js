@@ -3,8 +3,7 @@ import dotenv from "dotenv";
 import {v2 as cloudinary} from 'cloudinary';
 import connectMongoDatabase from "./config/db.js";
 
-dotenv.config({ path: "./backend/config/config.env" });
-console.log("DB_URI:", process.env.DB_URI); // ← add this temporarily
+dotenv.config({ path: "./backend/.env" });
 
 connectMongoDatabase();
 cloudinary.config({

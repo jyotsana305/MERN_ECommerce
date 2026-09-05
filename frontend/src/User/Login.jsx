@@ -29,10 +29,10 @@ function Login(){
     },[isAuthenticated])
     useEffect(()=>{
         if(success){
-           toast.success('LOgin Successful',{position:'top-center',autoClose:3000})
+           toast.success('Login successful',{position:'top-center',autoClose:3000})
            dispatch(removeSuccess())
         }
-    },[dispatch,,success])
+    },[dispatch,success])
 
 
     return(

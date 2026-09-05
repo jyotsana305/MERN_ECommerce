@@ -3,8 +3,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import '../UserStyles/Form.css';
-import PageTitle from "../PageTitle"; 
-import { resetPassword, removeErrors } from "../../actions/userActions"; 
+import PageTitle from "../components/PageTitle";
+import { resetPassword, removeErrors } from "./userSlice";
 function ResetPassword() {
     const { success, loading, error } = useSelector(state => state.user);
     const dispatch = useDispatch();
@@ -24,7 +24,7 @@ function ResetPassword() {
 
     useEffect(() => {
         if (error) {
-            toast.error(error.message, { position: 'top-center', autoClose: 3000 });
+            toast.error(error, { position: 'top-center', autoClose: 3000 });
             dispatch(removeErrors());
         }
         if (success) {

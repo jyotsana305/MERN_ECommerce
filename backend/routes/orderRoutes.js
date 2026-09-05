@@ -9,5 +9,6 @@ router.route('/admin/order/:id')
 .delete(verifyUserAuth,roleBasedAccess('admin'),deleteOrder)
 router.route('/admin/orders').get(verifyUserAuth,roleBasedAccess('admin'),getAllOrders)
 router.route('/orders/user').get(verifyUserAuth,allMyOrders)
+router.route('/order/:id').get(verifyUserAuth,getSingleOrder)
 
 export default router;

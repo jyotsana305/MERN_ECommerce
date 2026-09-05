@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../UserStyles/Form.css'
 import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
 import PageTitle from '../components/PageTitle';
-import { updatePassword } from './userSlice';
+import Loader from '../components/Loader';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { updatePassword, removeErrors, removeSuccess } from './userSlice';
 
-function UpdatePassword() { 
+function UpdatePassword() {
        const {success,loading,error}=useSelector(state=>state.user)
       const dispatch=useDispatch();
       const navigate=useNavigate();
@@ -24,7 +29,7 @@ function UpdatePassword() {
     }
        useEffect(()=>{
               if(error){
-                  toast.error(error.message,{position:'top-center',autoClose:3000});
+                  toast.error(error,{position:'top-center',autoClose:3000});
                   dispatch(removeErrors())
               }
           },[dispatch,error])

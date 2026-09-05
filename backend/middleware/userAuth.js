@@ -5,13 +5,16 @@ import User from '../model/userModel.js'
 
 export const verifyUserAuth=handleAsyncError(async(req,res,next)=>{
     const {token}=req.cookies;
-    console.log(token);
+    // console.log(token);
     if(!token){
         return next(new HandleError("Authentication is missing!Please login to access resource",401))
     }
     const decodedData=jwt.verify(token,process.env.JWT_SECRET_KEY);
-    console.log(decodedData);
+    // console.log(decodedData);
     req.user=await User.findById(decodedData.id);
+    if(!req.user){
+        return next(new HandleError("User belonging to this token no longer exists.Please login again",401))
+    }
     next();
 })
 export const roleBasedAccess=(...roles)=>{

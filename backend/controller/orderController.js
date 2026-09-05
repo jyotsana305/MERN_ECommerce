@@ -9,7 +9,7 @@ export const createNewOrder=handleAsyncError(async(req,res,next)=>{
     const order=await Order.create({shippingInfo,orderItems,paymentInfo,itemPrice,taxPrice,
         shippingPrice,totalPrice,paidAt:Date.now(),user:req.user._id
     })
-    res.status(200).json({
+    res.status(201).json({
       success:true,
       order
     })
@@ -20,6 +20,10 @@ export const getSingleOrder=handleAsyncError(async(req,res,next)=>{
     const order=await Order.findById(req.params.id).populate("user","name email")
     if(!order){
         return next(new HandleError("No order found",404));
+    }
+    //customers may only view their own orders; admins may view any order
+    if(req.user.role!=='admin' && order.user._id.toString()!==req.user.id.toString()){
+        return next(new HandleError("You are not allowed to access this order",403));
     }
     res.status(200).json({
         success:true,
@@ -59,7 +63,12 @@ export const updateOrderStatus=handleAsyncError(async(req,res,next)=>{
     if(order.orderStatus==='Delivered'){
         return next(new HandleError("This order is already been delivered",404))
     }
-    await Promise.all(order.orderItems.map(item=>updateQuantity(item.product,item.quantity)))
+    //only decrement stock once, on the first transition out of "Processing" -
+    //otherwise every subsequent status change (e.g. Shipped->Delivered) would
+    //decrement it again for the same order
+    if(order.orderStatus==='Processing'){
+        await Promise.all(order.orderItems.map(item=>updateQuantity(item.product,item.quantity)))
+    }
     order.orderStatus=req.body.status;
     if(order.orderStatus==='Delivered'){
         order.deliveredAt=Date.now();
@@ -75,9 +84,9 @@ export const updateOrderStatus=handleAsyncError(async(req,res,next)=>{
 async function updateQuantity(id,quantity) {
     const productData=await product.findById(id);
     if(!productData){
-        return next(new HandleError("Product not found",404));
+        throw new HandleError("Product not found",404);
     }
-    productData.stock-=quantity
+    productData.stock=Math.max(0,productData.stock-quantity)
     await productData.save({validateBeforeSave:false})
 }
 //delete order

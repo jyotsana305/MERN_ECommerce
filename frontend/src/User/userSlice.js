@@ -41,7 +41,7 @@ export const loadUser=createAsyncThunk('user/loadUser',async(__,{rejectWithValue
 })
 export const logout=createAsyncThunk('user/logout',async(__,{rejectWithValue})=>{
     try{
-      const {data}=await axios.post('/api/v1/logout',{withCredentials:true});
+      const {data}=await axios.post('/api/v1/logout',{},{withCredentials:true});
       return data
     }catch (error) {
         return rejectWithValue(error.response?.data || 'Registration failed.PLease try again later');
@@ -64,10 +64,10 @@ export const updatePassword=createAsyncThunk('user/updatePassword',async(formDat
     try{
         const config = {
             headers: {
-                'Content-type': 'application/json'
+                'Content-type': 'multipart/form-data'
             }
         };
-        const { data } = await axios.put('/api/v1/password/update', userData, config);
+        const { data } = await axios.put('/api/v1/password/update', formData, config);
         return data
     }catch (error) {
         return rejectWithValue(error.response?.data || {message:'Password Update Failed.'});
@@ -99,11 +99,53 @@ export const resetPassword=createAsyncThunk('user/resetPassword',async({token,us
         return rejectWithValue(error.response?.data || {message:'Password Update Failed.'});
     }
 })
+//Admin
+export const adminUsers=createAsyncThunk('user/adminUsers',async(__,{rejectWithValue})=>{
+    try{
+        const {data}=await axios.get('/api/v1/admin/users');
+        return data;
+    }catch(error){
+        return rejectWithValue(error.response?.data || {message:'Failed to load users'});
+    }
+})
+export const getSingleUserAdmin=createAsyncThunk('user/getSingleUserAdmin',async(id,{rejectWithValue})=>{
+    try{
+        const {data}=await axios.get(`/api/v1/admin/user/${id}`);
+        return data;
+    }catch(error){
+        return rejectWithValue(error.response?.data || {message:'Failed to load user'});
+    }
+})
+export const updateUserRole=createAsyncThunk('user/updateUserRole',async({id,role},{rejectWithValue})=>{
+    try{
+        const config = {headers: {'Content-type': 'application/json'}};
+        const {data}=await axios.put(`/api/v1/admin/user/${id}`,{role},config);
+        return data;
+    }catch(error){
+        return rejectWithValue(error.response?.data || {message:'Failed to update user role'});
+    }
+})
+export const deleteUserAdmin=createAsyncThunk('user/deleteUserAdmin',async(id,{rejectWithValue})=>{
+    try{
+        const {data}=await axios.delete(`/api/v1/admin/user/${id}`);
+        return data;
+    }catch(error){
+        return rejectWithValue(error.response?.data || {message:'Failed to delete user'});
+    }
+})
 const userSlice=createSlice({
     name:'user',
     initialState:{
         user:null,
+        users:[],
+        singleUser:null,
         loading:false,
+        // Whether the initial session-restore (loadUser, dispatched once on
+        // app mount) has finished. ProtectedRoutes waits for this before
+        // deciding whether to redirect to /login - without it, a hard reload
+        // of a protected route would see the default isAuthenticated:false
+        // and bounce the user away before the auth cookie was even checked.
+        authChecked:false,
         error:null,
         success:false,
         isAuthenticated:false,
@@ -146,12 +188,20 @@ const userSlice=createSlice({
         .addCase(loadUser.fulfilled,(state,action)=>{
             state.loading=false,
             state.error=null,
+            state.authChecked=true
             state.user=action.payload?.user ||null
             state.isAuthenticated=Boolean(action.payload?.user)
         })
-         .addCase(loadUser.rejected,(state,action)=>{
-            state.loading=false,
-            state.error=action.payload?.message ||'Failed to load user profile'
+         .addCase(loadUser.rejected,(state)=>{
+            // loadUser runs on every page load to silently restore a session
+            // from the auth cookie - failing just means "not logged in" (no
+            // cookie, or an expired/invalid one). That's not toast-worthy, and
+            // every page's own error-toast effect watches this same `error`
+            // field, so setting it here would surface a scary "invalid token"
+            // message on whatever page the user happens to be on, including
+            // the login page itself.
+            state.loading=false
+            state.authChecked=true
             state.user=null
             state.isAuthenticated=false
         })
@@ -256,6 +306,64 @@ const userSlice=createSlice({
          .addCase(resetPassword.rejected,(state,action)=>{
             state.loading=false,
             state.error=action.payload?.message || 'Email sent Failed'
+        })
+        //admin - all users
+        builder
+        .addCase(adminUsers.pending,(state)=>{
+            state.loading=true
+            state.error=null
+        })
+        .addCase(adminUsers.fulfilled,(state,action)=>{
+            state.loading=false
+            state.users=action.payload.users
+        })
+        .addCase(adminUsers.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload?.message || 'Failed to load users'
+        })
+        //admin - single user
+        builder
+        .addCase(getSingleUserAdmin.pending,(state)=>{
+            state.loading=true
+            state.error=null
+        })
+        .addCase(getSingleUserAdmin.fulfilled,(state,action)=>{
+            state.loading=false
+            state.singleUser=action.payload.user
+        })
+        .addCase(getSingleUserAdmin.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload?.message || 'Failed to load user'
+        })
+        //admin - update user role
+        builder
+        .addCase(updateUserRole.pending,(state)=>{
+            state.loading=true
+            state.error=null
+        })
+        .addCase(updateUserRole.fulfilled,(state,action)=>{
+            state.loading=false
+            state.success=action.payload.success
+            state.singleUser=action.payload.user
+        })
+        .addCase(updateUserRole.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload?.message || 'Failed to update user role'
+        })
+        //admin - delete user
+        builder
+        .addCase(deleteUserAdmin.pending,(state)=>{
+            state.loading=true
+            state.error=null
+        })
+        .addCase(deleteUserAdmin.fulfilled,(state,action)=>{
+            state.loading=false
+            state.success=action.payload.success
+            state.message=action.payload.message
+        })
+        .addCase(deleteUserAdmin.rejected,(state,action)=>{
+            state.loading=false
+            state.error=action.payload?.message || 'Failed to delete user'
         })
 
     }

@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import '../UserStyles/Form.css'
 import PageTitle from "../components/PageTitle";
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Loader from '../components/Loader';
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { forgotPassword, removeErrors, removeSuccess } from "./userSlice";
 
 function ForgotPassword(){
     const {loading,error,success,message}=useSelector(state=>state.user)
@@ -11,14 +14,14 @@ function ForgotPassword(){
     const [email,setEmail]=useState("");
     const forgotPasswordEmail=(e)=>{
         e.preventDefault();
-        const myForm=new FormData;
+        const myForm=new FormData();
         myForm.set('email',email)
         dispatch(forgotPassword(myForm))
         setEmail("")
     }
     useEffect(()=>{
               if(error){
-                  toast.error(error.message,{position:'top-center',autoClose:3000});
+                  toast.error(error,{position:'top-center',autoClose:3000});
                   dispatch(removeErrors())
               }
           },[dispatch,error])
@@ -26,7 +29,6 @@ function ForgotPassword(){
                     if(success){
                         toast.success(message,{position:'top-center',autoClose:3000});
                         dispatch(removeSuccess())
-                        navigate("/profile")
                     }
                 },[dispatch,success])
     return(
@@ -52,3 +54,4 @@ function ForgotPassword(){
         </>
     )
 }
+export default ForgotPassword;

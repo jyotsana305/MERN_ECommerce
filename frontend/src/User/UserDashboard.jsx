@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { userNavigate } from 'react-router-dom';
-import '../UserStyles/UserDashbord.css'
+import '../UserStyles/UserDashboard.css'
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import { logout,removeSuccess } from "./userSlice";
-function UserDashbord({user}){
+function UserDashbord(){
+    const {user}=useSelector(state=>state.user);
     const dispatch=useDispatch();
     const navigate=useNavigate();
     const [menuVisible,setMenuVisible]=useState(false);
@@ -36,7 +37,7 @@ function UserDashbord({user}){
         navigate('/login')
        })
        .catch((error)=>{
-        toast.success(error.message || 'Logout Failed',{position:'top-center',autoClose:3000})
+        toast.error(error.message || 'Logout Failed',{position:'top-center',autoClose:3000})
        })
     }
     function dashboard(){
@@ -47,7 +48,7 @@ function UserDashbord({user}){
         <div className={`overlay ${menuVisible?'show':''}`} onClick={toggleMenu}></div>
        <div className="dashboard-conatiner">
         <div className="profile-header" onClick={toggleMenu}>
-            <img src={user.avatar.url?user.avatar.url:'./images/profile.png'} alt="Profile
+            <img src={user.avatar?.url?user.avatar.url:'/images/profile.png'} alt="Profile
             Picture" className="profile-avatar"/>
             <span className="profile-name">{user.name || 'User'}</span>
              </div>

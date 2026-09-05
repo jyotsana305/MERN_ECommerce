@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import '../componentStyles/Navbar.css';
 import { useSelector } from "react-redux";
+import UserDashboard from '../User/UserDashboard';
 
 function Navbar(){
     const [isMenuOpen,setIsMenuOpen]=useState(false);
@@ -14,7 +15,8 @@ function Navbar(){
   const [searchQuery,setSearchQuery]=useState("");
   const toggleSearch=()=>setIsSearchOpen(!isSearchOpen)
   const toggleMenu=()=>setIsMenuOpen(!isMenuOpen)
-  const {isAuthenticated}=useSelector(state.user);
+  const {isAuthenticated}=useSelector(state=>state.user);
+  const {cartItems}=useSelector(state=>state.cart);
   const navigate=useNavigate();
   const handleSearchSubmit=(e)=>{
     e.preventDefault();
@@ -60,12 +62,16 @@ function Navbar(){
                     <div className="cart-container">
                         <Link to="/cart">
                         <ShoppingCartIcon className="icon"/>
-                        <span className="cart-badge">6</span>
+                        <span className="cart-badge">{cartItems.length}</span>
                         </Link>
                     </div>
-                    {isAuthenticated &&<Link to="/register" className='register-link'>
-                    <PersonAddIcon className='icon'/>
-                    </Link>}
+                    {isAuthenticated ? (
+                        <UserDashboard/>
+                    ) : (
+                        <Link to="/register" className='register-link'>
+                        <PersonAddIcon className='icon'/>
+                        </Link>
+                    )}
                     <div className="navbar-hamburger" onClick={toggleMenu}>
                         {isMenuOpen? <CloseIcon className='icon'/>:<MenuIcon className='icon'/>}
                     </div>

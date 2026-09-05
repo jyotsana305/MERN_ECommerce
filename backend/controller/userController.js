@@ -8,10 +8,13 @@ import {v2 as cloudinary} from 'cloudinary';
 
 
 export const registerUser = handleAsyncError(async (req, res, next) => {
-    console.log("Register hit");
-    console.log("👉 req.body:", req.body);
-    
-    const { name, email, password } = req.body;
+    // console.log("Register hit");
+    // console.log("👉 req.body:", req.body);
+
+    const { name, email, password, avatar } = req.body;
+    if(!avatar){
+        return next(new HandleError("Please upload an avatar",400))
+    }
     const myCloud=await cloudinary.uploader.upload(avatar,{
         folder:'avatars',
         width:150,
@@ -27,7 +30,7 @@ export const registerUser = handleAsyncError(async (req, res, next) => {
         }
     });
 
-    console.log("User created:", user);
+    // console.log("User created:", user);
     return sendToken(user, 201, res);
 });
 //login
@@ -40,8 +43,8 @@ export const loginUser = handleAsyncError(async (req, res, next) => {
 
     const user = await User.findOne({ email }).select("+password");
 
-    console.log("👉 Found user:", user);         // Check if user is found
-    console.log("👉 Stored hash:", user?.password); // Check if password hash exists
+    // console.log("👉 Found user:", user);
+    // console.log("👉 Stored hash:", user?.password);
 
     if (!user) {
         return next(new HandleError("Invalid Email or password", 401));
@@ -49,7 +52,7 @@ export const loginUser = handleAsyncError(async (req, res, next) => {
 
     const isPasswordValid = await user.verifyPassword(password);
 
-    console.log("👉 Password valid:", isPasswordValid); // Check comparison result
+    // console.log("👉 Password valid:", isPasswordValid);
 
     if (!isPasswordValid) {
         return next(new HandleError("Invalid email or password", 401));
@@ -70,8 +73,8 @@ export const logout=handleAsyncError(async(req,res,next)=>{
 })
 //forgot password
 export const requestPasswordReset=handleAsyncError(async(req,res,next)=>{
-    console.log("🔑 Forgot password hit"); // ← add this
-    console.log("Body:", req.body);         // ← and this
+    // console.log("🔑 Forgot password hit");
+    // console.log("Body:", req.body);
     const {email}=req.body
     const user=await User.findOne({email});
     if(!user){
@@ -123,7 +126,10 @@ export const resetPassword=handleAsyncError(async(req,res,next)=>{
     user.password=password;
     user.resetPasswordToken=undefined;
     user.resetPasswordExpire=undefined;
-    await user.save();
+    // Only the password/reset fields are being changed here - re-validating
+    // the whole document (name, avatar, etc.) would wrongly fail this save
+    // for any account whose other fields predate a schema change.
+    await user.save({validateBeforeSave:false});
     sendToken(user,200,res)
 })
 //get user details
@@ -146,20 +152,24 @@ export const updatePassword=handleAsyncError(async(req,res,next)=>{
         return next(new HandleError("Password doesn't match",400))
     }
     user.password=newPassword;
-    await user.save();
+    // Same reasoning as resetPassword above - don't re-validate unrelated
+    // fields just because we're changing the password.
+    await user.save({validateBeforeSave:false});
     sendToken(user,200,res);
 })
 //update profile
 export const updateProfile=handleAsyncError(async(req,res,next)=>{
-    const {name,email}=req.body;
+    const {name,email,avatar}=req.body;
     const updateUserDetails={
         name,
         email
     }
-    if(avatar!==""){
+    if(avatar){
         const user=await User.findById(req.user.id);
-        const imageId=user.avatar.public_id
-        await cloudinary.uploader.destroy(imageId)
+        const imageId=user.avatar?.public_id
+        if(imageId){
+            await cloudinary.uploader.destroy(imageId)
+        }
         const myCloud=await cloudinary.uploader.upload(avatar,{
                folder:'avatars',
             width:150,

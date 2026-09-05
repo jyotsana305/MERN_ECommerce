@@ -14,7 +14,7 @@ function Register(){
     })
 
      const [avatar,setAvatar]=useState("");
-     const [avatarPreview,setAvatarPreview]=useState('./images/profile.png')
+     const [avatarPreview,setAvatarPreview]=useState('/images/profile.png')
     const {name,email,password}=user;
     const {success,loading,error}=useSelector(state=>state.user);
         const dispatch=useDispatch()

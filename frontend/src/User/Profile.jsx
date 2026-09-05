@@ -1,10 +1,14 @@
 import React, { useEffect } from "react";
 import '../UserStyles/Profile.css';
 import {Link, useNavigate} from 'react-router-dom';
+import { useSelector } from "react-redux";
+import Loader from "../components/Loader";
+import PageTitle from "../components/PageTitle";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Profile(){
     const {loading,isAuthenticated,user}=useSelector(state=>state.user)
-    console.log(user);
     const navigate=useNavigate();
     useEffect(()=>{
         if(isAuthenticated===false){
@@ -13,11 +17,12 @@ function Profile(){
     },[isAuthenticated])
     return(
         <>
+        <PageTitle title={user?`${user.name} Profile`:'Profile'}/>
+        <Navbar/>
        {loading?(<Loader/>): (<div className="profile-container">
-            <PageTitle title={`${user.name} Profile`}/>
             <div className="profile-image">
                 <h1 className="profile-heading">My Profile</h1>
-                <img src={user.avatar.url ?user.avatar.url:'./images/profile.png'} 
+                <img src={user.avatar?.url ?user.avatar.url:'/images/profile.png'}
                 alt="User Profile" className="profile-image"/>
                 <Link to="/profile/update">Edit Profile</Link>
             </div>
@@ -41,6 +46,9 @@ function Profile(){
 
             </div>
         </div>)}
+        <Footer/>
         </>
     )
 }
+
+export default Profile;

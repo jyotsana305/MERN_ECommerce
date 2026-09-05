@@ -5,8 +5,9 @@ import Footer from "../components/Footer";
 import Rating from '@mui/material/Rating';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { getProductDetails, removeErrors } from '../features/products/productSlices';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getProductDetails, createProductReview, removeErrors, removeSuccess } from '../features/products/productSlices';
+import { addToCart } from '../features/cart/cartSlice';
 import '../pageStyles/ProductDetails.css';
 
 function ProductDetails() {
@@ -14,8 +15,10 @@ function ProductDetails() {
     const [quantity, setQuantity] = useState(1);
     const [reviewComment, setReviewComment] = useState('');
 
-    const { loading, error, product } = useSelector((state) => state.product);
+    const { loading, error, product, success } = useSelector((state) => state.product);
+    const { isAuthenticated } = useSelector((state) => state.user);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { id } = useParams();
 
     useEffect(() => {
@@ -25,16 +28,52 @@ function ProductDetails() {
 
     useEffect(() => {
         if (error) {
-            toast.error(error, { position: 'top-center', autoClose: 3000 });
+            toast.error(error.message, { position: 'top-center', autoClose: 3000 });
             dispatch(removeErrors());
         }
     }, [dispatch, error]);
+
+    useEffect(() => {
+        if (success) {
+            toast.success('Review submitted successfully', { position: 'top-center', autoClose: 3000 });
+            dispatch(removeSuccess());
+            setUserRating(0);
+            setReviewComment('');
+        }
+    }, [dispatch, success]);
 
     const increaseQty = () => {
         if (product && quantity < product.stock) setQuantity(q => q + 1);
     };
     const decreaseQty = () => {
         if (quantity > 1) setQuantity(q => q - 1);
+    };
+
+    const addToCartHandler = () => {
+        dispatch(addToCart({
+            product: product._id,
+            name: product.name,
+            price: product.price,
+            image: product.images && product.images[0]?.url,
+            stock: product.stock,
+            quantity
+        }));
+        toast.success('Item added to cart', { position: 'top-center', autoClose: 2000 });
+    };
+
+    const submitReviewHandler = () => {
+        if (!isAuthenticated) {
+            toast.error('Please login to submit a review', { position: 'top-center', autoClose: 3000 });
+            return navigate('/login');
+        }
+        if (!userRating) {
+            return toast.error('Please select a rating', { position: 'top-center', autoClose: 3000 });
+        }
+        if (!reviewComment.trim()) {
+            return toast.error('Please write a comment', { position: 'top-center', autoClose: 3000 });
+        }
+        dispatch(createProductReview({ ratings: userRating, comments: reviewComment, productId: id }))
+            .then(() => dispatch(getProductDetails(id)));
     };
 
     if (loading) return <div className="loader-container"><div className="loader"></div></div>;
@@ -64,7 +103,7 @@ function ProductDetails() {
                         <div className="product-rating">
                             <Rating value={product.ratings} precision={0.5} readOnly />
                             <span className="productCardSpan">
-                                ({product.numofReviews} {product.numofReviews === 1 ? 'Review' : 'Reviews'})
+                                ({product.numOfReviews} {product.numOfReviews === 1 ? 'Review' : 'Reviews'})
                             </span>
                         </div>
 
@@ -81,7 +120,7 @@ function ProductDetails() {
                             <button className="quantity-button" onClick={increaseQty}>+</button>
                         </div>
 
-                        <button className="add-to-cart-button" disabled={product.stock === 0}>
+                        <button className="add-to-cart-button" disabled={product.stock === 0} onClick={addToCartHandler}>
                             Add to Cart
                         </button>
 
@@ -98,7 +137,7 @@ function ProductDetails() {
                                 value={reviewComment}
                                 onChange={(e) => setReviewComment(e.target.value)}
                             />
-                            <button className="submit-review-button">Submit Review</button>
+                            <button className="submit-review-button" onClick={submitReviewHandler}>Submit Review</button>
                         </div>
                     </div>
                 </div>

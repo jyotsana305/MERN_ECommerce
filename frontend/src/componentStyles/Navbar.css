@@ -65,8 +65,9 @@
   .navbar-icons {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 1.5rem;
-    width: 250px;
+    flex-shrink: 0;
   }
   
   .icon {
@@ -169,9 +170,6 @@
     .search-item {
       width: 100%;
       justify-content: flex-start;
-    }
-    .navbar-icons{
-      width: 300px;
     }
   }
   

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import '../componentStyles/ImageSlider.css';
 
 const images = [
-    "./images/banner1.png",
-    "./images/banner2.png",
-    "./images/banner3.png",
-    "./images/banner4.png",
+    "/images/banner1.png",
+    "/images/banner2.png",
+    "/images/banner3.png",
+    "/images/banner4.png",
 ];
 
 function ImageSlider() {
