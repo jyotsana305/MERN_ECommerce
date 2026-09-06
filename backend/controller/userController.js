@@ -62,9 +62,15 @@ export const loginUser = handleAsyncError(async (req, res, next) => {
 });
 //logout
 export const logout=handleAsyncError(async(req,res,next)=>{
+    // Must match the attributes the cookie was actually set with
+    // (see sendToken) - otherwise the browser treats this as a different
+    // cookie and never actually clears the real one.
+    const isProduction=process.env.NODE_ENV==='production';
     res.cookie('token',null,{
         expires:new Date(Date.now()),
-        httpOnly:true
+        httpOnly:true,
+        secure:isProduction,
+        sameSite:isProduction?'none':'lax'
     })
     res.status(200).json({
         success:true,
