@@ -87,7 +87,10 @@ export const requestPasswordReset=handleAsyncError(async(req,res,next)=>{
     }catch(error){
      return next(new HandleError("Could not save reset token,please try again later",500))
     }
-    const resetPasswordURL = `${req.protocol}://${req.get('host')}/reset/${resetToken}`;
+    // The reset link must point at the FRONTEND page that handles
+    // /reset/:token (a React route) - req.protocol/req.get('host') would
+    // build a link to this API server itself, which doesn't serve that page.
+    const resetPasswordURL = `${process.env.FRONTEND_URL}/reset/${resetToken}`;
     const message=`Use the following link to reset your password:${resetPasswordURL}.\n\n This link will expire in 30 minutes.\n\n If you didn't request a password reset,please ignore this message`;
     try{
     //Send Email

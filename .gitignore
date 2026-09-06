@@ -5,3 +5,5 @@ backend/node_modules/
 .env
 backend/config/config.env
 dist/
+.vercel
+.env*
